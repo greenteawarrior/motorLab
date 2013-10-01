@@ -1,0 +1,26 @@
+// Emily Wang and Claire Diehl
+// POE Lab 2 : Controlling a motor
+
+// pin locations
+
+// control loop variables - do we want integers or floats?
+int potPos; //position of potentiometer
+int motorPos; //potPos converted into angles (degrees or radians?)
+int error; //subtraction: desired angle - current angle
+int Kp; //proportional constant term
+int angV; //instantaneous angular velocity of the motor
+int Kd; //derivative constant term
+int PDsum; //sum: propotional gain + derivative gain
+
+void setup(){
+  //intialize serial
+  Serial.begin(9600);
+  
+  //attach things onto Arduino pins
+  
+}
+
+void loop(){
+ 
+}
+
