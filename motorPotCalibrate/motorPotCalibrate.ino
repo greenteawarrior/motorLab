@@ -13,7 +13,7 @@ int potVal = 0;       // variable store the voltage from the potentiometer
 
 // Motor position things
 int motorStep = 100; //vary this for each trial to get calibration data
-
+boolean motorDir = FORWARD;
 
 // Stepper motor things 
 // (shoutout to Adafruit and their "StepperTest" example code)
@@ -32,7 +32,7 @@ Adafruit_StepperMotor *myMotor = AFMS.getStepper(512, 1);
 
 void setup() {
   Serial.begin(9600);
-  Serial.println('Beginning');
+  Serial.println("Beginning");
   
   AFMS.begin();  // create with the default frequency 1.6KHz
   myMotor->setSpeed(10);  // 10 rpm   
@@ -41,13 +41,17 @@ void setup() {
 
 void loop() {
   potVal = analogRead(potPin);    // read value from potentiometer
+  Serial.println("potVal:");
   Serial.println(potVal);
+  Serial.println();
   
   //Single coil steps
   myMotor->step(motorStep, FORWARD, SINGLE); 
-  myMotor->step(motorStep, BACKWARD, SINGLE);
-  Serial.println('motorStep'); 
-  Serial.println('Record the angle!');
-  
+  Serial.println("motorStep:");
+  Serial.println(motorStep); 
+  Serial.println();
+
   //FIGURE OUT WHICH DIRECTION IS WHICH (forwards or backwards)
   //print out a compass to put on to the output shaft
+}
+
