@@ -18,13 +18,23 @@ const float p2g = 0.263; // = 270/1023 converstion factor from potentiometer mea
 float potVal = 0;       // variable store the potentiometer's analogRead() measurement 
 
 int actualAngle; //potVal converted to angles (degrees); this is the current angular position of the motor
-const int desiredAngle = 200; //specified by user, any number between 130 and 270
+const int desiredAngle = 250; //specified by user, any number between 130 and 270
 boolean motorDir; //FORWARD or BACKWARD
 int error; // subtraction: desiredAngle - currentAngle
-float stepsToNextAngle; //
+float stepsToNextAngleProp; //
+float stepsToNextAngleDer; //
 
 float kP = .5; //proportional constant term
+float kD = 50; //derivative constant term
 
+//Derivative Control Terms
+float errorArray[4]={0,0,0,0};
+float errorDerivative;
+float total;
+int i;
+long oldTime;
+long newTime;
+long passedTime;
 
 void setup() {
   Serial.begin(9600);
@@ -36,25 +46,55 @@ void setup() {
 
 void loop() {
   potVal = analogRead(potPin);    // read value from potentiometer
-  
   actualAngle = potVal * p2g;
   error = desiredAngle - actualAngle;
-  stepsToNextAngle = kP * error;
-  stepsToNextAngle = abs(stepsToNextAngle);
+  
+  //Proportional Control
+  //stepsToNextAngleProp = kP * error;
+  //stepsToNextAngleProp = abs(stepsToNextAngleProp);
+  
+  //Derivative Control
+  newTime=millis();
+  passedTime = newTime - oldTime;
+  if (passedTime >= 20){
+    errorArray[0]=errorArray[1];
+    errorArray[1]=errorArray[2];
+    errorArray[2]=errorArray[3];
+    errorArray[3]=error;
+    Serial.println("ErrorArray");
+    Serial.println(errorArray[0]);
+    Serial.println(errorArray[1]);
+    Serial.println(errorArray[2]);
+    Serial.println(errorArray[3]);
+    Serial.println("");
+    for (i=0;i<4;i++){
+      total=total+errorArray[i];
+      Serial.println("arrayTotal");
+      Serial.println(total);
+    oldTime = newTime;
+    }
+    errorDerivative=total/(400);
+    total = 0;
+  }
+  //Serial.println(angleAverage);
+  stepsToNextAngleDer = kD * errorDerivative;
+  stepsToNextAngleDer = abs(stepsToNextAngleDer);
   
   if (error >= 0){
-    myMotor->step(stepsToNextAngle, FORWARD, SINGLE); 
+    myMotor->step(stepsToNextAngleDer, FORWARD, SINGLE); 
     Serial.println("FORWARD");
   }
 
   else if (error <= 0) {
-    myMotor->step(stepsToNextAngle, BACKWARD, SINGLE);  
+    myMotor->step(stepsToNextAngleDer, BACKWARD, SINGLE);  
     Serial.println("BACKWARD");
   }
     
   else if (error == 0) {
     myMotor->step(0, BACKWARD, SINGLE);      
   }
+  
+  
   
   Serial.println("potVal:");
   Serial.println(potVal);
@@ -64,8 +104,8 @@ void loop() {
   Serial.println(desiredAngle);
   Serial.println("error");
   Serial.println(error);
-  Serial.println("stepsToNextAngle:");
-  Serial.println(stepsToNextAngle);
+  Serial.println("stepsToNextAngleDer:");
+  Serial.println(stepsToNextAngleDer);
   Serial.println();
   
 }
