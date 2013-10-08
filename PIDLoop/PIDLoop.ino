@@ -21,10 +21,12 @@ int actualAngle; //potVal converted to angles (degrees); this is the current ang
 const int desiredAngle = 170; //specified by user, any number between 130 and 270
 boolean motorDir; //FORWARD or BACKWARD
 int error; // subtraction: desiredAngle - currentAngle
-float stepsToNextAngleProp; //
-float stepsToNextAngleDer; //
+
+float stepsToNextAngleProp; //proportional control calculation
+float stepsToNextAngleDer; //derivative control calculation
 float stepsToNextAngle;
 
+//Control constants
 float kP = .5; //proportional constant term
 float kD = 50; //derivative constant term
 
@@ -32,7 +34,7 @@ float kD = 50; //derivative constant term
 float errorArray[4]={0,0,0,0};
 float errorDerivative;
 float total;
-int i;
+int i; //for loop things
 long oldTime;
 long newTime;
 long passedTime;
@@ -46,7 +48,8 @@ void setup() {
 }
 
 void loop() {
-  potVal = analogRead(potPin);    // read value from potentiometer
+  //Read value of potentiometer and convert it to angles and obtain an error value.
+  potVal = analogRead(potPin);   
   actualAngle = potVal * p2g;
   error = desiredAngle - actualAngle;
   
@@ -80,25 +83,24 @@ void loop() {
   stepsToNextAngleDer = kD * errorDerivative;
   stepsToNextAngleDer = abs(stepsToNextAngleDer);
   
+  // Add the proportional and derivative things
   stepsToNextAngle = stepsToNextAngleProp + stepsToNextAngleDer;
  
   //Move the motor!!
   if (error >= 0){
-    myMotor->step(stepsToNextAngleDer, FORWARD, SINGLE); 
+    myMotor->step(stepsToNextAngle, FORWARD, SINGLE); 
     Serial.println("FORWARD");
   }
 
   else if (error <= 0) {
-    myMotor->step(stepsToNextAngleDer, BACKWARD, SINGLE);  
+    myMotor->step(stepsToNextAngle, BACKWARD, SINGLE);  
     Serial.println("BACKWARD");
   }
     
   else if (error == 0) {
     myMotor->step(0, BACKWARD, SINGLE);      
   }
-  
-  
-  
+   
   Serial.println("potVal:");
   Serial.println(potVal);
   Serial.println("actualAngle");
